@@ -276,11 +276,11 @@ impl PerformanceProfiler {
                 .push("Low throughput detected - consider async optimizations".to_string());
         }
 
-        if let Some(p99) = results.percentiles.get(&99)
-            && *p99 > Duration::from_millis(500)
-        {
-            recommendations
-                .push("High tail latency - investigate performance bottlenecks".to_string());
+        if let Some(p99) = results.percentiles.get(&99) {
+            if *p99 > Duration::from_millis(500) {
+                recommendations
+                    .push("High tail latency - investigate performance bottlenecks".to_string());
+            }
         }
 
         let error_rate = results.failed_requests as f64 / results.total_requests as f64;

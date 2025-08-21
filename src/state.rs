@@ -129,10 +129,10 @@ impl Config {
             config.host = host;
         }
 
-        if let Ok(port_str) = std::env::var("PORT")
-            && let Ok(port) = port_str.parse()
-        {
-            config.port = port;
+        if let Ok(port_str) = std::env::var("PORT") {
+            if let Ok(port) = port_str.parse() {
+                config.port = port;
+            }
         }
 
         if let Ok(env_str) = std::env::var("ENVIRONMENT") {
@@ -151,16 +151,16 @@ impl Config {
             config.cors_origins = origins.split(',').map(|s| s.trim().to_string()).collect();
         }
 
-        if let Ok(size_str) = std::env::var("MAX_REQUEST_SIZE")
-            && let Ok(size) = size_str.parse()
-        {
-            config.max_request_size = size;
+        if let Ok(size_str) = std::env::var("MAX_REQUEST_SIZE") {
+            if let Ok(size) = size_str.parse() {
+                config.max_request_size = size;
+            }
         }
 
-        if let Ok(timeout_str) = std::env::var("REQUEST_TIMEOUT")
-            && let Ok(timeout_secs) = timeout_str.parse::<u64>()
-        {
-            config.request_timeout = std::time::Duration::from_secs(timeout_secs);
+        if let Ok(timeout_str) = std::env::var("REQUEST_TIMEOUT") {
+            if let Ok(timeout_secs) = timeout_str.parse::<u64>() {
+                config.request_timeout = std::time::Duration::from_secs(timeout_secs);
+            }
         }
 
         config

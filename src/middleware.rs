@@ -614,18 +614,17 @@ impl PathParameterMiddleware {
 
         if route_parts.len() != path_parts.len() {
             // Handle wildcard at the end
-            if let Some(last_part) = route_parts.last()
-                && last_part.starts_with('*')
-                && route_parts.len() <= path_parts.len()
-            {
-                // Wildcard matches remaining path
-                let mut params = std::collections::HashMap::new();
-                let param_name = last_part.trim_start_matches('*');
-                if !param_name.is_empty() {
-                    let remaining_path = path_parts[route_parts.len() - 1..].join("/");
-                    params.insert(param_name.to_string(), remaining_path);
+            if let Some(last_part) = route_parts.last() {
+                if last_part.starts_with('*') && route_parts.len() <= path_parts.len() {
+                    // Wildcard matches remaining path
+                    let mut params = std::collections::HashMap::new();
+                    let param_name = last_part.trim_start_matches('*');
+                    if !param_name.is_empty() {
+                        let remaining_path = path_parts[route_parts.len() - 1..].join("/");
+                        params.insert(param_name.to_string(), remaining_path);
+                    }
+                    return Some(params);
                 }
-                return Some(params);
             }
             return None;
         }
@@ -658,11 +657,11 @@ impl Middleware for PathParameterMiddleware {
     async fn call(&self, mut req: Request, next: Next) -> Result<Response> {
         // Find matching route and extract parameters
         for (pattern, method) in &self.route_patterns {
-            if *method == req.method
-                && let Some(params) = self.match_dynamic_path(pattern, req.path())
-            {
-                req.set_params(params);
-                break;
+            if *method == req.method {
+                if let Some(params) = self.match_dynamic_path(pattern, req.path()) {
+                    req.set_params(params);
+                    break;
+                }
             }
         }
 

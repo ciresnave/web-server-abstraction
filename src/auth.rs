@@ -6,9 +6,9 @@
 use crate::error::{Result, WebServerError};
 use crate::types::Request;
 use auth_framework::{
-    AuthConfig, AuthFramework, AuthResult, Credential,
     methods::{ApiKeyMethod, JwtMethod},
     tokens::AuthToken,
+    AuthConfig, AuthFramework, AuthResult, Credential,
 };
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -153,10 +153,10 @@ impl AuthContext {
         // Try different authentication methods
 
         // 1. Try Bearer token (JWT)
-        if let Some(auth_header) = request.headers.get("authorization")
-            && let Some(token) = auth_header.strip_prefix("Bearer ")
-        {
-            return self.authenticate_bearer_token(token).await;
+        if let Some(auth_header) = request.headers.get("authorization") {
+            if let Some(token) = auth_header.strip_prefix("Bearer ") {
+                return self.authenticate_bearer_token(token).await;
+            }
         }
 
         // 2. Try API key
@@ -165,10 +165,10 @@ impl AuthContext {
         }
 
         // 3. Try session cookie
-        if let Some(cookie_str) = request.headers.get("cookie")
-            && let Some(session_token) = self.extract_session_token(cookie_str)
-        {
-            return self.authenticate_session_token(&session_token).await;
+        if let Some(cookie_str) = request.headers.get("cookie") {
+            if let Some(session_token) = self.extract_session_token(cookie_str) {
+                return self.authenticate_session_token(&session_token).await;
+            }
         }
 
         AuthMiddlewareResult::Unauthenticated
@@ -257,10 +257,10 @@ impl AuthContext {
     fn extract_session_token(&self, cookie_str: &str) -> Option<String> {
         for cookie in cookie_str.split(';') {
             let cookie = cookie.trim();
-            if let Some((name, value)) = cookie.split_once('=')
-                && name.trim() == "session_token"
-            {
-                return Some(value.trim().to_string());
+            if let Some((name, value)) = cookie.split_once('=') {
+                if name.trim() == "session_token" {
+                    return Some(value.trim().to_string());
+                }
             }
         }
         None
