@@ -892,10 +892,10 @@ impl Cookie {
             result.push_str(&format!("; Path={}", path));
         }
 
-        if let Some(expires) = self.expires {
-            if let Ok(duration) = expires.duration_since(SystemTime::UNIX_EPOCH) {
-                result.push_str(&format!("; Expires={}", duration.as_secs()));
-            }
+        if let Some(expires) = self.expires
+            && let Ok(duration) = expires.duration_since(SystemTime::UNIX_EPOCH)
+        {
+            result.push_str(&format!("; Expires={}", duration.as_secs()));
         }
 
         if let Some(max_age) = self.max_age {

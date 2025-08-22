@@ -99,17 +99,18 @@ impl Route {
 
         if route_parts.len() != path_parts.len() {
             // Handle wildcard at the end
-            if let Some(last_part) = route_parts.last() {
-                if last_part.starts_with('*') && route_parts.len() <= path_parts.len() {
-                    // Wildcard matches remaining path
-                    let mut params = std::collections::HashMap::new();
-                    let param_name = last_part.trim_start_matches('*');
-                    if !param_name.is_empty() {
-                        let remaining_path = path_parts[route_parts.len() - 1..].join("/");
-                        params.insert(param_name.to_string(), remaining_path);
-                    }
-                    return Some(params);
+            if let Some(last_part) = route_parts.last()
+                && last_part.starts_with('*')
+                && route_parts.len() <= path_parts.len()
+            {
+                // Wildcard matches remaining path
+                let mut params = std::collections::HashMap::new();
+                let param_name = last_part.trim_start_matches('*');
+                if !param_name.is_empty() {
+                    let remaining_path = path_parts[route_parts.len() - 1..].join("/");
+                    params.insert(param_name.to_string(), remaining_path);
                 }
+                return Some(params);
             }
             return None;
         }
@@ -146,14 +147,12 @@ pub enum AdapterType {
     ActixWeb(crate::adapters::actix_web::ActixWebAdapter),
     #[cfg(feature = "warp")]
     Warp(crate::adapters::warp::WarpAdapter),
-    // Note: The following adapters are work-in-progress and commented out
-    // due to compilation issues with framework-specific APIs
-    // #[cfg(feature = "rocket")]
-    // Rocket(crate::adapters::rocket::RocketAdapter),
-    // #[cfg(feature = "salvo")]
-    // Salvo(crate::adapters::salvo::SalvoAdapter),
-    // #[cfg(feature = "poem")]
-    // Poem(crate::adapters::poem::PoemAdapter),
+    #[cfg(feature = "rocket")]
+    Rocket(crate::adapters::rocket::RocketAdapter),
+    #[cfg(feature = "salvo")]
+    Salvo(crate::adapters::salvo::SalvoAdapter),
+    #[cfg(feature = "poem")]
+    Poem(crate::adapters::poem::PoemAdapter),
 }
 
 /// Main web server struct that uses an adapter
@@ -216,35 +215,35 @@ impl WebServer {
 
     // Note: The following adapter constructors are work-in-progress:
 
-    // /// Create a new web server with the Rocket adapter
-    // #[cfg(feature = "rocket")]
-    // pub fn with_rocket_adapter() -> Self {
-    //     Self {
-    //         adapter: AdapterType::Rocket(crate::adapters::rocket::RocketAdapter::new()),
-    //         routes: Vec::new(),
-    //         middleware: Vec::new(),
-    //     }
-    // }
+    /// Create a new web server with the Rocket adapter
+    #[cfg(feature = "rocket")]
+    pub fn with_rocket_adapter() -> Self {
+        Self {
+            adapter: AdapterType::Rocket(crate::adapters::rocket::RocketAdapter::new()),
+            routes: Vec::new(),
+            middleware: Vec::new(),
+        }
+    }
 
-    // /// Create a new web server with the Salvo adapter
-    // #[cfg(feature = "salvo")]
-    // pub fn with_salvo_adapter() -> Self {
-    //     Self {
-    //         adapter: AdapterType::Salvo(crate::adapters::salvo::SalvoAdapter::new()),
-    //         routes: Vec::new(),
-    //         middleware: Vec::new(),
-    //     }
-    // }
+    /// Create a new web server with the Salvo adapter
+    #[cfg(feature = "salvo")]
+    pub fn with_salvo_adapter() -> Self {
+        Self {
+            adapter: AdapterType::Salvo(crate::adapters::salvo::SalvoAdapter::new()),
+            routes: Vec::new(),
+            middleware: Vec::new(),
+        }
+    }
 
-    // /// Create a new web server with the Poem adapter
-    // #[cfg(feature = "poem")]
-    // pub fn with_poem_adapter() -> Self {
-    //     Self {
-    //         adapter: AdapterType::Poem(crate::adapters::poem::PoemAdapter::new()),
-    //         routes: Vec::new(),
-    //         middleware: Vec::new(),
-    //     }
-    // }
+    /// Create a new web server with the Poem adapter
+    #[cfg(feature = "poem")]
+    pub fn with_poem_adapter() -> Self {
+        Self {
+            adapter: AdapterType::Poem(crate::adapters::poem::PoemAdapter::new()),
+            routes: Vec::new(),
+            middleware: Vec::new(),
+        }
+    }
 
     /// Add a route to the server
     pub fn route<H, T>(mut self, path: impl Into<String>, method: HttpMethod, handler: H) -> Self
@@ -458,13 +457,37 @@ impl WebServer {
                     adapter.middleware(middleware);
                 }
                 adapter.bind(addr).await?;
-            } // Note: Additional adapter cases commented out until implementations are complete
-              // #[cfg(feature = "rocket")]
-              // AdapterType::Rocket(ref mut adapter) => { ... }
-              // #[cfg(feature = "salvo")]
-              // AdapterType::Salvo(ref mut adapter) => { ... }
-              // #[cfg(feature = "poem")]
-              // AdapterType::Poem(ref mut adapter) => { ... }
+            }
+            #[cfg(feature = "rocket")]
+            AdapterType::Rocket(adapter) => {
+                for route in self.routes {
+                    adapter.route(&route.path, route.method, route.handler);
+                }
+                for middleware in self.middleware {
+                    adapter.middleware(middleware);
+                }
+                adapter.bind(addr).await?;
+            }
+            #[cfg(feature = "salvo")]
+            AdapterType::Salvo(adapter) => {
+                for route in self.routes {
+                    adapter.route(&route.path, route.method, route.handler);
+                }
+                for middleware in self.middleware {
+                    adapter.middleware(middleware);
+                }
+                adapter.bind(addr).await?;
+            }
+            #[cfg(feature = "poem")]
+            AdapterType::Poem(adapter) => {
+                for route in self.routes {
+                    adapter.route(&route.path, route.method, route.handler);
+                }
+                for middleware in self.middleware {
+                    adapter.middleware(middleware);
+                }
+                adapter.bind(addr).await?;
+            }
         }
 
         Ok(BoundServer {
@@ -489,13 +512,12 @@ impl BoundServer {
             AdapterType::ActixWeb(adapter) => adapter.run().await,
             #[cfg(feature = "warp")]
             AdapterType::Warp(adapter) => adapter.run().await,
-            // Note: Additional adapter cases commented out until implementations are complete
-            // #[cfg(feature = "rocket")]
-            // AdapterType::Rocket(adapter) => adapter.run().await,
-            // #[cfg(feature = "salvo")]
-            // AdapterType::Salvo(adapter) => adapter.run().await,
-            // #[cfg(feature = "poem")]
-            // AdapterType::Poem(adapter) => adapter.run().await,
+            #[cfg(feature = "rocket")]
+            AdapterType::Rocket(adapter) => adapter.run().await,
+            #[cfg(feature = "salvo")]
+            AdapterType::Salvo(adapter) => adapter.run().await,
+            #[cfg(feature = "poem")]
+            AdapterType::Poem(adapter) => adapter.run().await,
         }
     }
 }

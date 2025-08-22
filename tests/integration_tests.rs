@@ -197,3 +197,90 @@ async fn test_status_codes() {
 
     let _bound_server = server.bind("127.0.0.1:0").await.unwrap();
 }
+
+// Framework-specific adapter tests
+#[cfg(feature = "rocket")]
+#[tokio::test]
+async fn test_rocket_adapter() {
+    use web_server_abstraction::{core::AdapterType, RocketAdapter};
+
+    let server = WebServer::new()
+        .route("/rocket", HttpMethod::GET, |_req| async {
+            Ok(Response::ok().body("Rocket adapter working"))
+        })
+        .adapter(AdapterType::Rocket);
+
+    let _bound_server = server.bind("127.0.0.1:0").await.unwrap();
+}
+
+#[cfg(feature = "salvo")]
+#[tokio::test]
+async fn test_salvo_adapter() {
+    use web_server_abstraction::{core::AdapterType, SalvoAdapter};
+
+    let server = WebServer::new()
+        .route("/salvo", HttpMethod::GET, |_req| async {
+            Ok(Response::ok().body("Salvo adapter working"))
+        })
+        .adapter(AdapterType::Salvo);
+
+    let _bound_server = server.bind("127.0.0.1:0").await.unwrap();
+}
+
+#[cfg(feature = "poem")]
+#[tokio::test]
+async fn test_poem_adapter() {
+    use web_server_abstraction::{core::AdapterType, PoemAdapter};
+
+    let server = WebServer::new()
+        .route("/poem", HttpMethod::GET, |_req| async {
+            Ok(Response::ok().body("Poem adapter working"))
+        })
+        .adapter(AdapterType::Poem);
+
+    let _bound_server = server.bind("127.0.0.1:0").await.unwrap();
+}
+
+#[cfg(any(feature = "rocket", feature = "salvo", feature = "poem"))]
+#[tokio::test]
+async fn test_multiple_framework_adapters() {
+    // Test that we can create servers with different adapters
+    let mock_server = WebServer::new().route("/mock", HttpMethod::GET, |_req| async {
+        Ok(Response::ok().body("Mock adapter"))
+    });
+
+    #[cfg(feature = "rocket")]
+    {
+        use web_server_abstraction::core::AdapterType;
+        let rocket_server = WebServer::new()
+            .route("/rocket", HttpMethod::GET, |_req| async {
+                Ok(Response::ok().body("Rocket adapter"))
+            })
+            .adapter(AdapterType::Rocket);
+        let _rocket_bound = rocket_server.bind("127.0.0.1:0").await.unwrap();
+    }
+
+    #[cfg(feature = "salvo")]
+    {
+        use web_server_abstraction::core::AdapterType;
+        let salvo_server = WebServer::new()
+            .route("/salvo", HttpMethod::GET, |_req| async {
+                Ok(Response::ok().body("Salvo adapter"))
+            })
+            .adapter(AdapterType::Salvo);
+        let _salvo_bound = salvo_server.bind("127.0.0.1:0").await.unwrap();
+    }
+
+    #[cfg(feature = "poem")]
+    {
+        use web_server_abstraction::core::AdapterType;
+        let poem_server = WebServer::new()
+            .route("/poem", HttpMethod::GET, |_req| async {
+                Ok(Response::ok().body("Poem adapter"))
+            })
+            .adapter(AdapterType::Poem);
+        let _poem_bound = poem_server.bind("127.0.0.1:0").await.unwrap();
+    }
+
+    let _mock_bound = mock_server.bind("127.0.0.1:0").await.unwrap();
+}

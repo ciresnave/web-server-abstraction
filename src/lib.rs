@@ -64,8 +64,8 @@ pub mod types;
 
 // Re-export core types
 pub use auth::{
-    auth_middleware, AuthContext, AuthContextConfig, AuthError, AuthMiddlewareResult,
-    AuthRequirements, RequestAuthExt, UserSession,
+    auth_middleware, enhanced_auth_middleware, AuthContext, AuthContextConfig, AuthError,
+    AuthMiddlewareResult, AuthRequirements, RequestAuthExt, UserSession,
 };
 pub use core::{Handler, HandlerFn, Route, WebServer};
 pub use error::{Result, WebServerError};
@@ -105,3 +105,12 @@ pub use adapters::actix_web::ActixWebAdapter;
 
 #[cfg(feature = "warp")]
 pub use adapters::warp::WarpAdapter;
+
+#[cfg(feature = "rocket")]
+pub use adapters::rocket::RocketAdapter;
+
+#[cfg(feature = "salvo")]
+pub use adapters::salvo::SalvoAdapter;
+
+#[cfg(feature = "poem")]
+pub use adapters::poem::PoemAdapter;
