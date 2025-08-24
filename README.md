@@ -22,11 +22,13 @@ An ergonomic abstraction layer over popular Rust web frameworks, allowing you to
 |-----------|-------------|--------|
 | Mock (Testing) | Default | ✅ Complete |
 | Axum | `axum` | ✅ Complete |
-| Actix-Web | `actix-web` | ✅ Complete |
-| Warp | `warp` | ✅ Complete |
-| Rocket | `rocket` | ✅ Complete |
-| Salvo | `salvo` | ✅ Complete |
-| Poem | `poem` | ✅ Complete |
+| Actix-Web | `actix-web` | 🚧 Updating for v4.0+ APIs |
+| Warp | `warp` | 🚧 Updating for v0.4+ APIs |
+| Rocket | `rocket` | 🚧 Updating for v0.5+ APIs |
+| Salvo | `salvo` | 🚧 Updating for v0.82+ APIs |
+| Poem | `poem` | 🚧 Updating for v3.0+ APIs |
+
+> **Note**: Framework adapters marked as "Updating" are temporarily disabled in v1.0.0 while being updated for the latest framework versions. They will be re-enabled in upcoming releases.
 
 ## Quick Start
 
@@ -34,9 +36,9 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-web-server-abstraction = "1.0.0"
+web-server-abstraction = "1.0.0"  # Includes Axum support by default
 
-# Enable specific framework support
+# Or explicitly enable Axum features
 web-server-abstraction = { version = "1.0.0", features = ["axum"] }
 ```
 

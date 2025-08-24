@@ -12,6 +12,9 @@ categories = ["web-programming", "network-programming"]
 [features]
 default = ["axum"]
 axum = ["dep:axum", "dep:tower", "dep:tower-http"]
+
+# Framework adapters currently being updated for new framework versions
+# These features are available but adapters may have limited functionality
 actix-web = ["dep:actix-web"]
 rocket = ["dep:rocket"]
 warp = ["dep:warp"]
@@ -40,19 +43,25 @@ hex = "0.4"
 flate2 = "1.0"
 
 # Authentication & Authorization - core to the abstraction
-auth-framework = { version = "0.4" }
+auth-framework = { version = "0.4.2" }
+
+# Constrain sqlx to a stable-compatible version (auth-framework pulls this in)
+sqlx = { version = "0.7", default-features = false }
 
 # Tower ecosystem - included by default for core functionality
-tower = { version = "0.4", optional = true }
-tower-http = { version = "0.5", optional = true, features = ["trace"] }
+tower = { version = "0.5", optional = true }
+tower-http = { version = "0.6", optional = true, features = ["trace"] }
 
 # Framework-specific dependencies (optional)
-axum = { version = "0.7", optional = true }
-actix-web = { version = "4.0", optional = true }
+axum = { version = "0.8", optional = true }
+
+# Framework adapters being updated for latest framework versions
+# These features are available but some implementations may be incomplete
+actix-web = { version = "4.9", optional = true }
 rocket = { version = "0.5", optional = true, features = ["json"] }
-warp = { version = "0.3", optional = true }
-salvo = { version = "0.68", optional = true }
-poem = { version = "3.0", optional = true }
+warp = { version = "0.4", optional = true }
+salvo = { version = "0.82", optional = true }
+poem = { version = "3.1", optional = true }
 
 [dev-dependencies]
 tokio-test = "0.4"
