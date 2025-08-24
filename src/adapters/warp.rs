@@ -163,10 +163,7 @@ async fn handle_warp_request_with_routing(
 }
 
 /// Convert Warp request to our Request type
-async fn convert_warp_request_to_ours(
-    headers: HeaderMap,
-    body: bytes::Bytes,
-) -> Result<Request> {
+async fn convert_warp_request_to_ours(headers: HeaderMap, body: bytes::Bytes) -> Result<Request> {
     // For this basic implementation, we'll use defaults for some fields
     // In a full implementation, these would be extracted from the Warp request
     let method = HttpMethod::GET; // Would be extracted from the filter
