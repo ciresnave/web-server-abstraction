@@ -3,8 +3,9 @@
 use crate::core::{HandlerFn, Middleware};
 use crate::error::{Result, WebServerError};
 use crate::types::{Body, Headers, HttpMethod, Request, StatusCode};
+use http::HeaderMap;
 use std::{collections::HashMap, convert::Infallible, net::SocketAddr, sync::Arc};
-use warp::{Filter, Reply, http::StatusCode as WarpStatusCode, hyper::HeaderMap};
+use warp::{Filter, Reply, http::StatusCode as WarpStatusCode};
 
 /// Warp framework adapter
 pub struct WarpAdapter {
@@ -162,7 +163,10 @@ async fn handle_warp_request_with_routing(
 }
 
 /// Convert Warp request to our Request type
-async fn convert_warp_request_to_ours(headers: HeaderMap, body: bytes::Bytes) -> Result<Request> {
+async fn convert_warp_request_to_ours(
+    headers: HeaderMap,
+    body: bytes::Bytes,
+) -> Result<Request> {
     // For this basic implementation, we'll use defaults for some fields
     // In a full implementation, these would be extracted from the Warp request
     let method = HttpMethod::GET; // Would be extracted from the filter

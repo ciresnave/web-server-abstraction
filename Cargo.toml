@@ -59,9 +59,10 @@ axum = { version = "0.8", optional = true }
 # These features are available but some implementations may be incomplete
 actix-web = { version = "4.9", optional = true }
 rocket = { version = "0.5", optional = true, features = ["json"] }
-warp = { version = "0.4", optional = true }
+warp = { version = "0.4", optional = true, features = ["server"] }
 salvo = { version = "0.82", optional = true }
 poem = { version = "3.1", optional = true }
+num_cpus = "1.17.0"
 
 [dev-dependencies]
 tokio-test = "0.4"

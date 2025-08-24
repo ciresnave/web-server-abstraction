@@ -11,11 +11,10 @@ use std::sync::Arc;
 
 #[cfg(feature = "actix-web")]
 use actix_web::{
-    body::MessageBody,
-    dev::{ServiceRequest, ServiceResponse},
-    http::header::{HeaderMap as ActixHeaderMap, HeaderName, HeaderValue},
+    App, HttpRequest, HttpResponse, HttpServer,
+    http::header::{HeaderName, HeaderValue},
     middleware::Logger,
-    web, App, HttpRequest, HttpResponse, HttpServer,
+    web,
 };
 
 /// Actix-Web adapter for the web server abstraction
@@ -79,16 +78,17 @@ impl ActixWebAdapter {
             // Add all routes to the app
             let routes_clone = routes.clone();
             for (path, method, _) in routes_clone.iter() {
-                let path_clone = path.clone();
                 let routes_for_handler = routes.clone();
 
                 match method {
                     HttpMethod::GET => {
+                        let path_for_route = path.clone();
+                        let path_for_closure = path.clone();
                         app = app.route(
-                            &path_clone,
+                            &path_for_route,
                             web::get().to(move |req: HttpRequest, body: web::Bytes| {
                                 let routes = routes_for_handler.clone();
-                                let path = path_clone.clone();
+                                let path = path_for_closure.clone();
                                 async move {
                                     handle_actix_request(req, body, routes, path, HttpMethod::GET)
                                         .await
@@ -97,11 +97,13 @@ impl ActixWebAdapter {
                         );
                     }
                     HttpMethod::POST => {
+                        let path_for_route = path.clone();
+                        let path_for_closure = path.clone();
                         app = app.route(
-                            &path_clone,
+                            &path_for_route,
                             web::post().to(move |req: HttpRequest, body: web::Bytes| {
                                 let routes = routes_for_handler.clone();
-                                let path = path_clone.clone();
+                                let path = path_for_closure.clone();
                                 async move {
                                     handle_actix_request(req, body, routes, path, HttpMethod::POST)
                                         .await
@@ -110,11 +112,13 @@ impl ActixWebAdapter {
                         );
                     }
                     HttpMethod::PUT => {
+                        let path_for_route = path.clone();
+                        let path_for_closure = path.clone();
                         app = app.route(
-                            &path_clone,
+                            &path_for_route,
                             web::put().to(move |req: HttpRequest, body: web::Bytes| {
                                 let routes = routes_for_handler.clone();
-                                let path = path_clone.clone();
+                                let path = path_for_closure.clone();
                                 async move {
                                     handle_actix_request(req, body, routes, path, HttpMethod::PUT)
                                         .await
@@ -123,11 +127,13 @@ impl ActixWebAdapter {
                         );
                     }
                     HttpMethod::DELETE => {
+                        let path_for_route = path.clone();
+                        let path_for_closure = path.clone();
                         app = app.route(
-                            &path_clone,
+                            &path_for_route,
                             web::delete().to(move |req: HttpRequest, body: web::Bytes| {
                                 let routes = routes_for_handler.clone();
-                                let path = path_clone.clone();
+                                let path = path_for_closure.clone();
                                 async move {
                                     handle_actix_request(
                                         req,
@@ -142,11 +148,13 @@ impl ActixWebAdapter {
                         );
                     }
                     HttpMethod::PATCH => {
+                        let path_for_route = path.clone();
+                        let path_for_closure = path.clone();
                         app = app.route(
-                            &path_clone,
+                            &path_for_route,
                             web::patch().to(move |req: HttpRequest, body: web::Bytes| {
                                 let routes = routes_for_handler.clone();
-                                let path = path_clone.clone();
+                                let path = path_for_closure.clone();
                                 async move {
                                     handle_actix_request(req, body, routes, path, HttpMethod::PATCH)
                                         .await
@@ -155,11 +163,13 @@ impl ActixWebAdapter {
                         );
                     }
                     HttpMethod::HEAD => {
+                        let path_for_route = path.clone();
+                        let path_for_closure = path.clone();
                         app = app.route(
-                            &path_clone,
+                            &path_for_route,
                             web::head().to(move |req: HttpRequest, body: web::Bytes| {
                                 let routes = routes_for_handler.clone();
-                                let path = path_clone.clone();
+                                let path = path_for_closure.clone();
                                 async move {
                                     handle_actix_request(req, body, routes, path, HttpMethod::HEAD)
                                         .await
@@ -168,31 +178,37 @@ impl ActixWebAdapter {
                         );
                     }
                     HttpMethod::OPTIONS => {
+                        let path_for_route = path.clone();
+                        let path_for_closure = path.clone();
                         app = app.route(
-                            &path_clone,
-                            web::options().to(move |req: HttpRequest, body: web::Bytes| {
-                                let routes = routes_for_handler.clone();
-                                let path = path_clone.clone();
-                                async move {
-                                    handle_actix_request(
-                                        req,
-                                        body,
-                                        routes,
-                                        path,
-                                        HttpMethod::OPTIONS,
-                                    )
-                                    .await
-                                }
-                            }),
+                            &path_for_route,
+                            web::route().method(actix_web::http::Method::OPTIONS).to(
+                                move |req: HttpRequest, body: web::Bytes| {
+                                    let routes = routes_for_handler.clone();
+                                    let path = path_for_closure.clone();
+                                    async move {
+                                        handle_actix_request(
+                                            req,
+                                            body,
+                                            routes,
+                                            path,
+                                            HttpMethod::OPTIONS,
+                                        )
+                                        .await
+                                    }
+                                },
+                            ),
                         );
                     }
                     _ => {
                         // Default to GET for other methods
+                        let path_for_route = path.clone();
+                        let path_for_closure = path.clone();
                         app = app.route(
-                            &path_clone,
+                            &path_for_route,
                             web::get().to(move |req: HttpRequest, body: web::Bytes| {
                                 let routes = routes_for_handler.clone();
-                                let path = path_clone.clone();
+                                let path = path_for_closure.clone();
                                 async move {
                                     handle_actix_request(req, body, routes, path, HttpMethod::GET)
                                         .await
@@ -267,7 +283,7 @@ async fn handle_actix_request(
 
     // Call our handler
     match handler(our_request).await {
-        Ok(response) => convert_our_response_to_actix(response),
+        Ok(response) => convert_our_response_to_actix(response).await,
         Err(e) => {
             eprintln!("Handler error: {:?}", e);
             HttpResponse::InternalServerError().body(format!("Handler error: {}", e))
@@ -307,7 +323,7 @@ async fn convert_actix_request_to_ours(req: HttpRequest, body: web::Bytes) -> Re
         .map_err(|e| WebServerError::custom(format!("Invalid URI: {}", e)))?;
 
     // Parse query parameters
-    let query_params = req
+    let _query_params: HashMap<String, String> = req
         .query_string()
         .split('&')
         .filter(|s| !s.is_empty())
@@ -324,18 +340,17 @@ async fn convert_actix_request_to_ours(req: HttpRequest, body: web::Bytes) -> Re
         uri,
         version: http::Version::HTTP_11,
         headers,
-        body: Body::from_bytes(body.to_vec()),
+        body: Body::from_bytes(body.clone()),
         extensions: std::collections::HashMap::new(),
         path_params: std::collections::HashMap::new(),
         cookies: std::collections::HashMap::new(),
         form_data: None,
         multipart: None,
-        query_params,
     })
 }
 
 #[cfg(feature = "actix-web")]
-fn convert_our_response_to_actix(response: Response) -> HttpResponse {
+async fn convert_our_response_to_actix(response: Response) -> HttpResponse {
     let mut actix_response = HttpResponse::build(convert_status_code(response.status));
 
     // Add headers
@@ -349,8 +364,8 @@ fn convert_our_response_to_actix(response: Response) -> HttpResponse {
     }
 
     // Add body
-    match response.body.into_bytes() {
-        Ok(bytes) => actix_response.body(bytes),
+    match response.body.bytes().await {
+        Ok(bytes) => actix_response.body(bytes.to_vec()),
         Err(_) => actix_response.body(""),
     }
 }
