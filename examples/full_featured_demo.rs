@@ -8,7 +8,7 @@ use web_server_abstraction::{
     CompressionMiddleware, Config, ContentNegotiationMiddleware, Cookie, CspMiddleware,
     CsrfMiddleware, DatabaseValue, HttpMethod, Request, Response, Row, SessionManager, SharedState,
     StaticFileConfig, StaticFileHandler, WebServer, WebServerError, XssProtectionMiddleware,
-    sanitize,
+    config::CompressionConfig, sanitize,
 };
 
 #[tokio::main]
@@ -86,7 +86,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .support_type("application/xml".to_string(), 0.8)
         .default_type("application/json".to_string());
 
-    let compression = CompressionMiddleware::new().min_size(1024);
+    let compression = CompressionMiddleware::new(CompressionConfig {
+        min_size: 1024,
+        ..Default::default()
+    });
 
     // Clone for use in closures
     let users_clone = Arc::new(users);

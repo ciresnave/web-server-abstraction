@@ -239,7 +239,7 @@ impl StaticFileHandler {
 /// Create a function-based handler for static files
 impl Handler<()> for StaticFileHandler {
     fn into_handler(self) -> crate::core::HandlerFn {
-        Box::new(move |req| {
+        Arc::new(move |req| {
             let handler = self.clone();
             Box::pin(async move { handler.handle(req).await })
         })

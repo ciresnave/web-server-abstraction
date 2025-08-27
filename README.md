@@ -1,6 +1,33 @@
 # Web Server Abstraction
 
-An ergonomic abstraction layer over popular Rust web frameworks, allowing you to write web applications once and run them on any supported framework.
+An ergonomic abstraction layer over popular Rust web frameworks# Use specific framework adapters
+
+# [cfg(feature = "axum")]
+
+let server = WebServer::with_axum_adapter();
+
+# [cfg(feature = "actix-web")]
+
+let server = WebServer::with_actix_adapter();
+
+# [cfg(feature = "warp")]
+
+let server = WebServer::with_warp_adapter();
+
+# [cfg(feature = "rocket")]
+
+let server = WebServer::with_rocket_adapter();
+
+# [cfg(feature = "salvo")]
+
+let server = WebServer::with_salvo_adapter();
+
+# [cfg(feature = "poem")]
+
+let server = WebServer::with_poem_adapter();
+
+// Or use the mock adapter for testing
+let server = WebServer::with_mock_adapter();ou to write web applications once and run them on any supported framework.
 
 ## Features
 
@@ -22,13 +49,13 @@ An ergonomic abstraction layer over popular Rust web frameworks, allowing you to
 |-----------|-------------|--------|
 | Mock (Testing) | Default | ✅ Complete |
 | Axum | `axum` | ✅ Complete |
-| Actix-Web | `actix-web` | 🚧 Updating for v4.0+ APIs |
-| Warp | `warp` | 🚧 Updating for v0.4+ APIs |
-| Rocket | `rocket` | 🚧 Updating for v0.5+ APIs |
-| Salvo | `salvo` | 🚧 Updating for v0.82+ APIs |
-| Poem | `poem` | 🚧 Updating for v3.0+ APIs |
+| Actix-Web | `actix-web` | ✅ Complete |
+| Warp | `warp` | ✅ Complete |
+| Rocket | `rocket` | ✅ Complete |
+| Salvo | `salvo` | ✅ Complete |
+| Poem | `poem` | ✅ Complete |
 
-> **Note**: Framework adapters marked as "Updating" are temporarily disabled in v1.0.0 while being updated for the latest framework versions. They will be re-enabled in upcoming releases.
+> **Note**: All framework adapters are production-ready and fully tested with their latest versions.
 
 ## Quick Start
 
@@ -36,10 +63,13 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-web-server-abstraction = "1.0.0"  # Includes Axum support by default
+web-server-abstraction = "1.0.2"  # Includes Axum support by default
 
-# Or explicitly enable Axum features
-web-server-abstraction = { version = "1.0.0", features = ["axum"] }
+# Or explicitly enable specific framework features
+web-server-abstraction = { version = "1.0.2", features = ["axum"] }
+
+# Enable multiple frameworks
+web-server-abstraction = { version = "1.0.2", features = ["axum", "rocket", "poem"] }
 ```
 
 ### Basic Example

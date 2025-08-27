@@ -297,14 +297,14 @@ async fn convert_actix_request_to_ours(req: HttpRequest, body: web::Bytes) -> Re
     use http::Uri;
 
     // Convert method
-    let method = match req.method() {
-        &actix_web::http::Method::GET => HttpMethod::GET,
-        &actix_web::http::Method::POST => HttpMethod::POST,
-        &actix_web::http::Method::PUT => HttpMethod::PUT,
-        &actix_web::http::Method::DELETE => HttpMethod::DELETE,
-        &actix_web::http::Method::PATCH => HttpMethod::PATCH,
-        &actix_web::http::Method::HEAD => HttpMethod::HEAD,
-        &actix_web::http::Method::OPTIONS => HttpMethod::OPTIONS,
+    let method = match *req.method() {
+        actix_web::http::Method::GET => HttpMethod::GET,
+        actix_web::http::Method::POST => HttpMethod::POST,
+        actix_web::http::Method::PUT => HttpMethod::PUT,
+        actix_web::http::Method::DELETE => HttpMethod::DELETE,
+        actix_web::http::Method::PATCH => HttpMethod::PATCH,
+        actix_web::http::Method::HEAD => HttpMethod::HEAD,
+        actix_web::http::Method::OPTIONS => HttpMethod::OPTIONS,
         _ => HttpMethod::GET, // Default fallback
     };
 
@@ -394,7 +394,7 @@ mod tests {
     async fn test_actix_web_adapter_route_addition() {
         let mut adapter = ActixWebAdapter::new();
 
-        let handler = Box::new(|_req: Request| {
+        let handler = Arc::new(|_req: Request| {
             Box::pin(async move { Ok(Response::ok().body("Test response")) })
                 as BoxFuture<Result<Response>>
         }) as HandlerFn;
@@ -407,7 +407,7 @@ mod tests {
     async fn test_actix_web_adapter_request_handling() {
         let mut adapter = ActixWebAdapter::new();
 
-        let handler = Box::new(|_req: Request| {
+        let handler = Arc::new(|_req: Request| {
             Box::pin(async move { Ok(Response::ok().body("Hello from Actix-Web adapter")) })
                 as BoxFuture<Result<Response>>
         }) as HandlerFn;
@@ -425,7 +425,6 @@ mod tests {
             cookies: std::collections::HashMap::new(),
             form_data: None,
             multipart: None,
-            query_params: std::collections::HashMap::new(),
         };
 
         let response = adapter.handle_request(request).await.unwrap();

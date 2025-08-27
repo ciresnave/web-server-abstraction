@@ -2,7 +2,7 @@
 
 use std::time::Duration;
 use web_server_abstraction::{
-    BenchmarkConfig, HttpMethod, PerformanceProfiler, Response, StatusCode, WebServer,
+    HttpMethod, PerformanceProfiler, Response, StatusCode, WebServer, benchmarks::BenchmarkConfig,
 };
 
 #[tokio::main]

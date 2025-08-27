@@ -597,6 +597,12 @@ impl HttpMethod {
     }
 }
 
+impl std::fmt::Display for HttpMethod {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
 impl From<Method> for HttpMethod {
     fn from(method: Method) -> Self {
         match method {
@@ -645,6 +651,9 @@ impl StatusCode {
     pub const FORBIDDEN: StatusCode = StatusCode(403);
     pub const NOT_FOUND: StatusCode = StatusCode(404);
     pub const METHOD_NOT_ALLOWED: StatusCode = StatusCode(405);
+    pub const CONFLICT: StatusCode = StatusCode(409);
+    pub const PAYLOAD_TOO_LARGE: StatusCode = StatusCode(413);
+    pub const TOO_MANY_REQUESTS: StatusCode = StatusCode(429);
     pub const INTERNAL_SERVER_ERROR: StatusCode = StatusCode(500);
     pub const BAD_GATEWAY: StatusCode = StatusCode(502);
     pub const SERVICE_UNAVAILABLE: StatusCode = StatusCode(503);
@@ -756,6 +765,12 @@ impl Body {
 
     pub fn from_bytes(bytes: Bytes) -> Self {
         Self { data: bytes }
+    }
+
+    pub fn from_string(s: &str) -> Self {
+        Self {
+            data: Bytes::from(s.to_owned()),
+        }
     }
 
     pub async fn bytes(&self) -> crate::error::Result<Bytes> {

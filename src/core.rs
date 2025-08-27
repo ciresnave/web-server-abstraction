@@ -5,12 +5,13 @@ use crate::types::{HttpMethod, Request, Response};
 use async_trait::async_trait;
 use std::future::Future;
 use std::pin::Pin;
+use std::sync::Arc;
 
 /// A boxed future that returns a Result<Response>
 pub type BoxFuture<T> = Pin<Box<dyn Future<Output = T> + Send + 'static>>;
 
 /// A handler function type that takes a request and returns a response
-pub type HandlerFn = Box<dyn Fn(Request) -> BoxFuture<Result<Response>> + Send + Sync>;
+pub type HandlerFn = Arc<dyn Fn(Request) -> BoxFuture<Result<Response>> + Send + Sync>;
 
 /// Trait for middleware components
 #[async_trait]
@@ -21,7 +22,7 @@ pub trait Middleware: Send + Sync {
 
 /// Represents the next middleware in the chain
 pub struct Next {
-    handler: Box<dyn Fn(Request) -> BoxFuture<Result<Response>> + Send + Sync>,
+    handler: HandlerFn,
 }
 
 impl Next {
@@ -46,7 +47,7 @@ where
     Fut: Future<Output = Result<Response>> + Send + 'static,
 {
     fn into_handler(self) -> HandlerFn {
-        Box::new(move |req| {
+        Arc::new(move |req| {
             let handler = self.clone();
             Box::pin(async move { handler(req).await })
         })
@@ -471,10 +472,10 @@ impl WebServer {
             #[cfg(feature = "salvo")]
             AdapterType::Salvo(adapter) => {
                 for route in self.routes {
-                    adapter.route(&route.path, route.method, route.handler);
+                    let _ = adapter.route(&route.path, route.method, route.handler);
                 }
                 for middleware in self.middleware {
-                    adapter.middleware(middleware);
+                    let _ = adapter.middleware(middleware);
                 }
                 adapter.bind(addr).await?;
             }

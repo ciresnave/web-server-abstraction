@@ -204,7 +204,7 @@ async fn convert_warp_request_to_ours(headers: HeaderMap, body: bytes::Bytes) ->
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{Body, Headers, StatusCode};
+    use crate::types::{Body, Headers, Response, StatusCode};
 
     #[tokio::test]
     async fn test_warp_adapter_creation() {
